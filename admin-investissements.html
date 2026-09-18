@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROLEX ADMIN — Investissements</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#03140a;
+      --panel:#071d11;
+      --panel2:#092719;
+      --border:rgba(212,163,23,.18);
+      --gold:#d4a317;
+      --gold-light:#f0c94d;
+      --green:#10b981;
+      --text:#f4f7f5;
+      --muted:#91a49a;
+      --danger:#ef4444;
+      --warning:#f59e0b;
+      --blue:#3b82f6;
+      --shadow:0 18px 50px rgba(0,0,0,.25);
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      font-family:Inter,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    button,
+    input,
+    select{
+      font:inherit;
+    }
+
+    button{
+      cursor:pointer;
+    }
+
+    .topbar{
+      height:72px;
+      border-bottom:1px solid var(--border);
+      background:#04180d;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      position:sticky;
+      top:0;
+      z-index:20;
+      box-shadow:0 8px 30px rgba(0,0,0,.18);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:800;
+      letter-spacing:1.5px;
+      color:var(--gold-light);
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border:1px solid var(--gold);
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      color:var(--gold);
+      font-weight:800;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background:var(--panel);
+      color:var(--text);
+      padding:10px 15px;
+      border-radius:9px;
+      transition:.2s;
+    }
+
+    .btn:hover{
+      border-color:var(--gold);
+    }
+
+    .btn.gold{
+      background:var(--gold);
+      color:#071109;
+      border-color:var(--gold);
+      font-weight:700;
+    }
+
+    .container{
+      padding:28px;
+      max-width:1600px;
+      margin:auto;
+    }
+
+    .heading{
+      margin-bottom:22px;
+    }
+
+    .heading h1{
+      font-size:27px;
+      margin-bottom:7px;
+    }
+
+    .heading p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(5,1fr);
+      gap:14px;
+      margin-bottom:22px;
+    }
+
+    .stat{
+      background:linear-gradient(145deg,var(--panel),var(--panel2));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:18px;
+      box-shadow:var(--shadow);
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:12px;
+      margin-bottom:9px;
+    }
+
+    .stat-value{
+      font-size:22px;
+      font-weight:800;
+    }
+
+    .filters{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+
+    .field{
+      flex:1;
+      min-width:190px;
+    }
+
+    .field input,
+    .field select{
+      width:100%;
+      background:#04180d;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:9px;
+      padding:11px 12px;
+      outline:none;
+    }
+
+    .field input:focus,
+    .field select:focus{
+      border-color:var(--gold);
+    }
+
+    .table-wrap{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:auto;
+      box-shadow:var(--shadow);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1250px;
+    }
+
+    th,
+    td{
+      padding:15px 14px;
+      border-bottom:1px solid rgba(255,255,255,.055);
+      text-align:left;
+      white-space:nowrap;
+      font-size:13px;
+    }
+
+    th{
+      background:#06190f;
+      color:var(--muted);
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.7px;
+    }
+
+    tbody tr:hover{
+      background:rgba(255,255,255,.018);
+    }
+
+    .user-name{
+      font-weight:700;
+    }
+
+    .user-code{
+      color:var(--muted);
+      font-size:11px;
+      margin-top:4px;
+    }
+
+    .money{
+      font-weight:700;
+    }
+
+    .status{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 9px;
+      border-radius:20px;
+      font-size:11px;
+      font-weight:700;
+    }
+
+    .status.active{
+      background:rgba(16,185,129,.12);
+      color:#34d399;
+    }
+
+    .status.completed{
+      background:rgba(59,130,246,.12);
+      color:#60a5fa;
+    }
+
+    .status.other{
+      background:rgba(245,158,11,.12);
+      color:#fbbf24;
+    }
+
+    .empty{
+      padding:45px 20px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .loading{
+      padding:35px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .error{
+      margin-bottom:16px;
+      background:rgba(239,68,68,.10);
+      border:1px solid rgba(239,68,68,.25);
+      color:#fca5a5;
+      padding:13px 15px;
+      border-radius:10px;
+      display:none;
+    }
+
+    .footer-info{
+      color:var(--muted);
+      font-size:11px;
+      margin-top:14px;
+      text-align:right;
+    }
+
+    @media(max-width:1000px){
+      .stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+
+    @media(max-width:650px){
+      .topbar{
+        padding:0 15px;
+      }
+
+      .brand{
+        font-size:13px;
+      }
+
+      .top-actions .btn{
+        padding:8px 10px;
+        font-size:12px;
+      }
+
+      .container{
+        padding:18px 12px;
+      }
+
+      .heading h1{
+        font-size:23px;
+      }
+
+      .stats{
+        grid-template-columns:1fr;
+      }
+
+      .filters{
+        flex-direction:column;
+      }
+
+      .field{
+        min-width:100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">R</div>
+      <span>ROLEX ADMIN</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn" onclick="window.location.href='dashboard-admin.html'">
+        Tableau de bord
+      </button>
+
+      <button class="btn gold" id="refreshBtn">
+        Actualiser
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="heading">
+      <h1>Investissements</h1>
+      <p>Suivi des investissements enregistrés sur la plateforme.</p>
+    </section>
+
+    <div id="errorBox" class="error"></div>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat-label">Investissements</div>
+        <div class="stat-value" id="totalInvestments">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Actifs</div>
+        <div class="stat-value" id="activeInvestments">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Terminés</div>
+        <div class="stat-value" id="completedInvestments">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Total investi</div>
+        <div class="stat-value" id="totalInvested">0 XOF</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Total généré</div>
+        <div class="stat-value" id="totalGenerated">0 XOF</div>
+      </div>
+    </section>
+
+    <section class="filters">
+      <div class="field">
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Rechercher utilisateur, code ou produit..."
+        >
+      </div>
+
+      <div class="field">
+        <select id="statusFilter">
+          <option value="">Tous les statuts</option>
+          <option value="active">Actifs</option>
+          <option value="completed">Terminés</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="table-wrap">
+      <div id="loading" class="loading">
+        Chargement des investissements...
+      </div>
+
+      <table id="investmentsTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Pays</th>
+            <th>Produit</th>
+            <th>Investi</th>
+            <th>Rendement/jour</th>
+            <th>Généré</th>
+            <th>Revenus</th>
+            <th>Début</th>
+            <th>Prochain revenu</th>
+            <th>Fin</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody id="investmentsBody"></tbody>
+      </table>
+
+      <div id="empty" class="empty" style="display:none;">
+        Aucun investissement trouvé.
+      </div>
+    </section>
+
+    <div class="footer-info">
+      Les données affichées proviennent de la base de données ROLEX.
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin-investissements.js"></script>
+
+</body>
+</html>
