@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROLEX Admin — Dépôts</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
+
+  <style>
+    :root {
+      --bg: #03140a;
+      --bg2: #051e10;
+      --panel: #071b10;
+      --panel2: #092416;
+      --border: rgba(212, 163, 23, 0.18);
+      --gold: #d4a317;
+      --gold-light: #f0c94d;
+      --green: #10b981;
+      --green-dark: #087a55;
+      --white: #f5f7f6;
+      --muted: #91a39a;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --blue: #3b82f6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(212, 163, 23, 0.06), transparent 30%),
+        var(--bg);
+      color: var(--white);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(3, 20, 10, 0.96);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--gold), #8f6d09);
+      color: #10150d;
+      font-size: 18px;
+      box-shadow: 0 8px 25px rgba(212, 163, 23, 0.15);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 17px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .back-btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--white);
+      padding: 10px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .back-btn:hover {
+      border-color: rgba(212, 163, 23, 0.45);
+      background: rgba(212, 163, 23, 0.08);
+    }
+
+    .container {
+      width: min(1500px, calc(100% - 32px));
+      margin: 28px auto;
+    }
+
+    .page-title {
+      margin-bottom: 20px;
+    }
+
+    .page-title h1 {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .page-title p {
+      color: var(--muted);
+      margin-top: 7px;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 15px;
+      margin-bottom: 16px;
+      background: linear-gradient(
+        145deg,
+        rgba(9, 36, 22, 0.92),
+        rgba(5, 30, 16, 0.92)
+      );
+      border: 1px solid var(--border);
+      border-radius: 15px;
+    }
+
+    .field {
+      position: relative;
+    }
+
+    .field i {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .field input,
+    .field select {
+      height: 42px;
+      min-width: 190px;
+      padding: 0 13px 0 38px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.09);
+      outline: none;
+      color: var(--white);
+      background: rgba(0,0,0,0.22);
+    }
+
+    .field select {
+      padding-left: 13px;
+    }
+
+    .field input::placeholder {
+      color: #6f8177;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: rgba(212, 163, 23, 0.55);
+      box-shadow: 0 0 0 3px rgba(212, 163, 23, 0.07);
+    }
+
+    .refresh-btn {
+      height: 42px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      background: rgba(16, 185, 129, 0.08);
+      color: #7ee8c3;
+      padding: 0 15px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .refresh-btn.loading i {
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .message {
+      display: none;
+      padding: 13px 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.09);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .message.success {
+      color: #a7f3d0;
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .table-card {
+      overflow: hidden;
+      border-radius: 15px;
+      background: linear-gradient(
+        145deg,
+        rgba(7, 27, 16, 0.96),
+        rgba(5, 24, 13, 0.96)
+      );
+      border: 1px solid var(--border);
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 1250px;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: rgba(212, 163, 23, 0.055);
+    }
+
+    th {
+      text-align: left;
+      white-space: nowrap;
+      padding: 15px 14px;
+      color: #bfcac4;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 15px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.045);
+      font-size: 13px;
+      color: #dbe4df;
+      vertical-align: middle;
+    }
+
+    tbody tr {
+      transition: background 0.18s;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,0.025);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: var(--white);
+      white-space: nowrap;
+    }
+
+    .user-code {
+      color: var(--muted);
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .country {
+      display: inline-flex;
+      padding: 5px 8px;
+      border-radius: 7px;
+      background: rgba(255,255,255,0.045);
+      color: #cbd5d0;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .amount {
+      color: var(--gold-light);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .date {
+      color: var(--muted);
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status.pending {
+      color: #fcd34d;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.16);
+    }
+
+    .status.verified {
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.16);
+    }
+
+    .status.approved {
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.16);
+    }
+
+    .status.rejected {
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.035);
+      color: #dbe4df;
+      padding: 7px 9px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: 0.18s;
+    }
+
+    .action-btn:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .action-btn.verify {
+      color: #93c5fd;
+      border-color: rgba(59,130,246,0.2);
+    }
+
+    .action-btn.approve {
+      color: #6ee7b7;
+      border-color: rgba(16,185,129,0.2);
+    }
+
+    .action-btn.reject {
+      color: #fca5a5;
+      border-color: rgba(239,68,68,0.2);
+    }
+
+    .action-btn.proof {
+      color: var(--gold-light);
+      border-color: rgba(212,163,23,0.25);
+      background: rgba(212,163,23,0.055);
+    }
+
+    .action-btn.proof:hover {
+      background: rgba(212,163,23,0.12);
+      border-color: rgba(212,163,23,0.4);
+    }
+
+    .no-proof {
+      color: #65766d;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state.show {
+      display: block;
+    }
+
+    .empty-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.035);
+      color: #6d7d74;
+      font-size: 21px;
+    }
+
+    .empty-state h3 {
+      color: #cbd5d0;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+    }
+
+    .loading {
+      padding: 45px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .loading i {
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--gold);
+      animation: spin 1s linear infinite;
+    }
+
+    /* Modal rejet */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(480px, 100%);
+      background: #071b10;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.45);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 17px;
+    }
+
+    .modal-header h2 {
+      font-size: 17px;
+    }
+
+    .close-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+    }
+
+    .close-btn:hover {
+      color: var(--white);
+      background: rgba(255,255,255,0.07);
+    }
+
+    .modal-card label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b9c6bf;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .modal-card textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(0,0,0,0.22);
+      color: var(--white);
+      outline: none;
+    }
+
+    .modal-card textarea:focus {
+      border-color: rgba(212,163,23,0.45);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      margin-top: 16px;
+    }
+
+    .modal-btn {
+      border-radius: 9px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(255,255,255,0.04);
+      color: var(--white);
+    }
+
+    .modal-btn.danger {
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.25);
+      color: #fca5a5;
+    }
+
+    @media (max-width: 700px) {
+      .header {
+        padding: 0 14px;
+      }
+
+      .container {
+        width: min(100% - 20px, 1500px);
+        margin-top: 20px;
+      }
+
+      .brand-text span {
+        display: none;
+      }
+
+      .back-btn span {
+        display: none;
+      }
+
+      .back-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      .field {
+        width: 100%;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+      }
+
+      .refresh-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-money-bill-transfer"></i>
+      </div>
+
+      <div class="brand-text">
+        <strong>ROLEX ADMIN</strong>
+        <span>Gestion des dépôts</span>
+      </div>
+    </div>
+
+    <button class="back-btn" id="backBtn">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Tableau de bord</span>
+    </button>
+  </header>
+
+  <main class="container">
+
+    <div class="page-title">
+      <h1>Dépôts</h1>
+      <p>Vérifiez et validez les demandes de dépôt des utilisateurs.</p>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div class="toolbar">
+
+      <div class="field">
+        <select id="statusFilter">
+          <option value="">Tous les statuts</option>
+          <option value="pending">En attente</option>
+          <option value="verified">Vérifiés</option>
+          <option value="approved">Approuvés</option>
+          <option value="rejected">Rejetés</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Rechercher un utilisateur..."
+          autocomplete="off"
+        >
+      </div>
+
+      <button class="refresh-btn" id="refreshBtn">
+        <i class="fa-solid fa-rotate"></i>
+        Actualiser
+      </button>
+
+    </div>
+
+    <div class="table-card">
+
+      <div id="loading" class="loading">
+        <i class="fa-solid fa-circle-notch"></i>
+        <div>Chargement des dépôts...</div>
+      </div>
+
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+
+        <h3>Aucun dépôt trouvé</h3>
+        <p>Il n'y a aucune demande correspondant aux critères sélectionnés.</p>
+      </div>
+
+      <div id="tableContainer" class="table-wrapper" style="display:none;">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Pays</th>
+              <th>Téléphone payeur</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Preuve</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody id="depositBody"></tbody>
+        </table>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal rejet -->
+  <div class="modal" id="rejectModal">
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+        <h2>Rejeter le dépôt</h2>
+
+        <button class="close-btn" id="cancelReject">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <label for="rejectReason">
+        Motif du rejet
+      </label>
+
+      <textarea
+        id="rejectReason"
+        placeholder="Indiquez le motif du rejet..."
+      ></textarea>
+
+      <div class="modal-actions">
+
+        <button class="modal-btn" id="cancelRejectBottom">
+          Annuler
+        </button>
+
+        <button class="modal-btn danger" id="confirmReject">
+          <i class="fa-solid fa-ban"></i>
+          Confirmer le rejet
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="admin-depots.js"></script>
+
+</body>
+</html>
