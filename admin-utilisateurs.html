@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROLEX — Utilisateurs</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #06150d;
+      color: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: #041109;
+      border-right: 1px solid rgba(212,163,23,.2);
+      padding: 22px 14px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 5px 10px 25px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      margin-bottom: 18px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: #d4a317;
+      color: #06150d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+    }
+
+    .brand strong {
+      color: #d4a317;
+      font-size: 19px;
+      letter-spacing: 1px;
+    }
+
+    .brand small {
+      display: block;
+      color: #7f9186;
+      margin-top: 3px;
+    }
+
+    .nav-title {
+      color: #66796e;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 18px 10px 8px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #aebbb3;
+      padding: 12px 13px;
+      border-radius: 9px;
+      margin-bottom: 4px;
+      font-size: 14px;
+      transition: .2s;
+    }
+
+    .nav-link i {
+      width: 19px;
+      text-align: center;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(212,163,23,.12);
+      color: #d4a317;
+    }
+
+    .main {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      padding: 25px;
+    }
+
+    .mobile-header {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .menu-btn {
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(212,163,23,.25);
+      background: #0b2115;
+      color: #d4a317;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 25px;
+      margin-bottom: 5px;
+    }
+
+    .page-header p {
+      color: #819188;
+      font-size: 13px;
+    }
+
+    .refresh-btn {
+      border: 1px solid rgba(212,163,23,.3);
+      background: #0a2114;
+      color: #d4a317;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(212,163,23,.12);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: #0a1d12;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 12px;
+      padding: 17px;
+    }
+
+    .stat-label {
+      color: #7e9087;
+      font-size: 12px;
+      margin-bottom: 9px;
+    }
+
+    .stat-value {
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .gold {
+      color: #d4a317;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 180px 180px;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      background: #0a1d12;
+      border: 1px solid rgba(255,255,255,.08);
+      color: #fff;
+      border-radius: 9px;
+      padding: 12px 13px;
+      outline: none;
+    }
+
+    .input:focus,
+    .select:focus {
+      border-color: rgba(212,163,23,.55);
+    }
+
+    .table-card {
+      background: #081a10;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 13px;
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+
+    th {
+      text-align: left;
+      padding: 14px;
+      color: #74857d;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,.045);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,.025);
+    }
+
+    .user-name {
+      font-weight: 600;
+    }
+
+    .muted {
+      display: block;
+      color: #72827a;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .amount {
+      color: #d4a317;
+      font-weight: 700;
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status.active {
+      color: #58d49b;
+      background: rgba(16,185,129,.12);
+    }
+
+    .status.blocked {
+      color: #ff8080;
+      background: rgba(220,60,60,.12);
+    }
+
+    .status.suspended {
+      color: #e9c66a;
+      background: rgba(212,163,23,.12);
+    }
+
+    .action-btn {
+      border: 1px solid rgba(212,163,23,.25);
+      background: #0b2115;
+      color: #d4a317;
+      border-radius: 7px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-right: 4px;
+    }
+
+    .action-btn:hover {
+      background: rgba(212,163,23,.12);
+    }
+
+    .danger-btn {
+      color: #ff8585;
+      border-color: rgba(255,80,80,.25);
+    }
+
+    .empty,
+    .loading,
+    .error {
+      padding: 45px 20px;
+      text-align: center;
+      color: #71827a;
+    }
+
+    .error {
+      color: #ff8585;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.72);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: min(850px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #081a10;
+      border: 1px solid rgba(212,163,23,.2);
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h2 {
+      font-size: 19px;
+    }
+
+    .close-btn {
+      border: 0;
+      background: transparent;
+      color: #829189;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .detail {
+      background: #0b2115;
+      border-radius: 9px;
+      padding: 12px;
+    }
+
+    .detail.full {
+      grid-column: 1 / -1;
+    }
+
+    .detail-label {
+      color: #708078;
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      color: #fff;
+      font-size: 13px;
+      word-break: break-word;
+    }
+
+    .section-title {
+      margin: 22px 0 10px;
+      color: #d4a317;
+      font-size: 14px;
+    }
+
+    .transactions {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .transaction {
+      background: #0b2115;
+      border-radius: 8px;
+      padding: 11px;
+      display: grid;
+      grid-template-columns: 1fr 120px 120px;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .transaction .type {
+      color: #fff;
+    }
+
+    .transaction .date {
+      color: #71827a;
+    }
+
+    .transaction .money {
+      color: #d4a317;
+      text-align: right;
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    @media (max-width: 1100px) {
+      .stats {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .filters .input {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: .25s;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 18px;
+      }
+
+      .mobile-header {
+        display: flex;
+      }
+
+      .page-header {
+        align-items: flex-start;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 550px) {
+      .stats,
+      .filters {
+        grid-template-columns: 1fr;
+      }
+
+      .filters .input {
+        grid-column: auto;
+      }
+
+      .page-header {
+        flex-direction: column;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .detail.full {
+        grid-column: auto;
+      }
+
+      .transaction {
+        grid-template-columns: 1fr;
+      }
+
+      .transaction .money {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-crown"></i>
+      </div>
+
+      <div>
+        <strong>ROLEX</strong>
+        <small>Administration</small>
+      </div>
+    </div>
+
+    <div class="nav-title">Principal</div>
+
+    <a class="nav-link" href="dashboard-admin.html">
+      <i class="fa-solid fa-chart-line"></i>
+      Dashboard
+    </a>
+
+    <a class="nav-link" href="admin-depots.html">
+      <i class="fa-solid fa-arrow-down"></i>
+      Dépôts
+    </a>
+
+    <a class="nav-link" href="admin-investissements.html">
+      <i class="fa-solid fa-chart-pie"></i>
+      Investissements
+    </a>
+
+    <a class="nav-link" href="admin-retraits.html">
+      <i class="fa-solid fa-arrow-up"></i>
+      Retraits
+    </a>
+
+    <a class="nav-link" href="admin-paiements.html">
+      <i class="fa-solid fa-credit-card"></i>
+      Paiements
+    </a>
+
+    <div class="nav-title">Gestion</div>
+
+    <a class="nav-link active" href="admin-utilisateurs.html">
+      <i class="fa-solid fa-users"></i>
+      Utilisateurs
+    </a>
+
+    <a class="nav-link" href="admin-produits.html">
+      <i class="fa-solid fa-box"></i>
+      Produits
+    </a>
+
+    <a class="nav-link" href="admin-administrateurs.html">
+      <i class="fa-solid fa-user-shield"></i>
+      Administrateurs
+    </a>
+
+    <a class="nav-link" href="admin-parametres.html">
+      <i class="fa-solid fa-gear"></i>
+      Paramètres
+    </a>
+
+  </aside>
+
+  <main class="main">
+
+    <div class="mobile-header">
+      <button class="menu-btn" id="menuBtn">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <strong style="color:#d4a317;">ROLEX</strong>
+    </div>
+
+    <div class="page-header">
+      <div>
+        <h1>Utilisateurs</h1>
+        <p>Gestion des comptes utilisateurs ROLEX.</p>
+      </div>
+
+      <button class="refresh-btn" id="refreshBtn">
+        <i class="fa-solid fa-rotate"></i>
+        Actualiser
+      </button>
+    </div>
+
+    <section class="stats">
+
+      <div class="stat">
+        <div class="stat-label">Total utilisateurs</div>
+        <div class="stat-value" id="statTotal">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Actifs</div>
+        <div class="stat-value" id="statActive">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Bloqués</div>
+        <div class="stat-value" id="statBlocked">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Suspendus</div>
+        <div class="stat-value" id="statSuspended">0</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-label">Solde total</div>
+        <div class="stat-value gold" id="statBalance">0 XOF</div>
+      </div>
+
+    </section>
+
+    <section class="filters">
+
+      <input
+        id="searchInput"
+        class="input"
+        type="search"
+        placeholder="Rechercher nom, téléphone, code utilisateur..."
+      >
+
+      <select id="statusFilter" class="select">
+        <option value="">Tous les statuts</option>
+        <option value="active">Actifs</option>
+        <option value="blocked">Bloqués</option>
+        <option value="suspended">Suspendus</option>
+      </select>
+
+      <select id="countryFilter" class="select">
+        <option value="">Tous les pays</option>
+        <option value="BF">Burkina Faso</option>
+        <option value="CI">Côte d'Ivoire</option>
+        <option value="BJ">Bénin</option>
+        <option value="TG">Togo</option>
+        <option value="CM">Cameroun</option>
+      </select>
+
+    </section>
+
+    <section class="table-card">
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th>Pays</th>
+              <th>Téléphone</th>
+              <th>Solde</th>
+              <th>Dépôts</th>
+              <th>Profits</th>
+              <th>Retraits</th>
+              <th>Commissions</th>
+              <th>Statut</th>
+              <th>Inscription</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="usersBody">
+
+            <tr>
+              <td colspan="11">
+                <div class="loading">
+                  Chargement des utilisateurs...
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+
+<div class="overlay" id="modalOverlay">
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>Détails utilisateur</h2>
+
+      <button class="close-btn" id="closeModal">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+    </div>
+
+    <div id="detailsContent"></div>
+
+  </div>
+
+</div>
+
+
+<script src="admin-utilisateurs.js"></script>
+
+</body>
+  </html>
