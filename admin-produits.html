@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROLEX — Produits</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#06150d;color:#fff}
+    button,input{font:inherit}
+
+    .sidebar{
+      position:fixed;left:0;top:0;bottom:0;width:245px;
+      background:#041109;border-right:1px solid rgba(212,163,23,.2);
+      padding:20px 13px;overflow:auto
+    }
+
+    .brand{
+      display:flex;align-items:center;gap:12px;
+      padding:5px 10px 22px;margin-bottom:18px;
+      border-bottom:1px solid rgba(255,255,255,.07)
+    }
+
+    .brand-icon{
+      width:40px;height:40px;border-radius:10px;
+      background:#d4a317;color:#06150d;
+      display:flex;align-items:center;justify-content:center
+    }
+
+    .brand strong{color:#d4a317;font-size:19px}
+    .brand small{display:block;color:#718078;margin-top:3px}
+
+    .nav-title{
+      color:#63736b;font-size:11px;text-transform:uppercase;
+      margin:18px 10px 8px
+    }
+
+    .nav-link{
+      display:flex;gap:12px;align-items:center;
+      color:#aab8b0;text-decoration:none;padding:12px;
+      border-radius:8px;margin-bottom:4px;font-size:14px
+    }
+
+    .nav-link i{width:19px;text-align:center}
+    .nav-link:hover,.nav-link.active{
+      background:rgba(212,163,23,.12);color:#d4a317
+    }
+
+    .main{
+      margin-left:245px;padding:25px;
+    }
+
+    .mobile{
+      display:none;justify-content:space-between;
+      margin-bottom:18px
+    }
+
+    .menu{
+      width:42px;height:42px;background:#0b2115;
+      color:#d4a317;border:1px solid rgba(212,163,23,.3);
+      border-radius:8px
+    }
+
+    .header{
+      display:flex;justify-content:space-between;
+      align-items:center;margin-bottom:22px
+    }
+
+    h1{font-size:25px;margin-bottom:5px}
+    .subtitle{color:#7b8d84;font-size:13px}
+
+    .btn{
+      border:1px solid rgba(212,163,23,.3);
+      background:#0b2115;color:#d4a317;
+      padding:10px 14px;border-radius:8px;cursor:pointer
+    }
+
+    .btn:hover{background:rgba(212,163,23,.12)}
+
+    .stats{
+      display:grid;grid-template-columns:repeat(4,1fr);
+      gap:14px;margin-bottom:20px
+    }
+
+    .stat{
+      background:#0a1d12;border:1px solid rgba(255,255,255,.06);
+      border-radius:11px;padding:17px
+    }
+
+    .stat small{color:#788980}
+    .stat strong{display:block;font-size:21px;margin-top:8px}
+    .gold{color:#d4a317}
+
+    .toolbar{
+      display:flex;gap:10px;margin-bottom:15px
+    }
+
+    .search{
+      flex:1;background:#0a1d12;color:#fff;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;padding:12px;outline:none
+    }
+
+    .card{
+      background:#081a10;border:1px solid rgba(255,255,255,.06);
+      border-radius:12px;overflow:hidden
+    }
+
+    .table-wrap{overflow:auto}
+
+    table{width:100%;border-collapse:collapse;min-width:950px}
+
+    th{
+      padding:13px;text-align:left;color:#718179;
+      font-size:11px;text-transform:uppercase;
+      border-bottom:1px solid rgba(255,255,255,.07)
+    }
+
+    td{
+      padding:13px;border-bottom:1px solid rgba(255,255,255,.045);
+      font-size:13px
+    }
+
+    tr:hover{background:rgba(255,255,255,.02)}
+
+    .product{
+      display:flex;align-items:center;gap:10px
+    }
+
+    .product img{
+      width:42px;height:42px;border-radius:8px;
+      object-fit:cover;background:#10251a
+    }
+
+    .muted{
+      display:block;color:#718179;
+      font-size:11px;margin-top:3px
+    }
+
+    .status{
+      display:inline-block;padding:5px 9px;
+      border-radius:20px;font-size:11px
+    }
+
+    .active{background:rgba(16,185,129,.12);color:#58d49b}
+    .inactive{background:rgba(255,255,255,.07);color:#8c9993}
+
+    .action{
+      border:1px solid rgba(212,163,23,.25);
+      background:#0b2115;color:#d4a317;
+      padding:7px 9px;border-radius:7px;
+      cursor:pointer;margin-right:4px
+    }
+
+    .empty,.loading,.error{
+      padding:40px;text-align:center;color:#718179
+    }
+
+    .error{color:#ff8585}
+
+    .overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,.72);
+      align-items:center;justify-content:center;
+      padding:20px;z-index:2000
+    }
+
+    .overlay.show{display:flex}
+
+    .modal{
+      width:min(620px,100%);
+      background:#081a10;border:1px solid rgba(212,163,23,.2);
+      border-radius:13px;padding:22px
+    }
+
+    .modal-head{
+      display:flex;justify-content:space-between;
+      align-items:center;margin-bottom:20px
+    }
+
+    .close{
+      background:none;border:0;color:#89968f;
+      font-size:20px;cursor:pointer
+    }
+
+    .form{
+      display:grid;grid-template-columns:1fr 1fr;
+      gap:12px
+    }
+
+    .field.full{grid-column:1/-1}
+
+    label{
+      display:block;color:#83928b;
+      font-size:12px;margin-bottom:6px
+    }
+
+    input{
+      width:100%;background:#0b2115;
+      color:#fff;border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;padding:11px;outline:none
+    }
+
+    .modal-actions{
+      display:flex;justify-content:flex-end;
+      gap:8px;margin-top:20px
+    }
+
+    @media(max-width:800px){
+      .sidebar{transform:translateX(-100%);transition:.25s}
+      .sidebar.open{transform:translateX(0)}
+      .main{margin-left:0;padding:18px}
+      .mobile{display:flex}
+      .stats{grid-template-columns:repeat(2,1fr)}
+    }
+
+    @media(max-width:550px){
+      .stats,.form{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      .header{align-items:flex-start;gap:10px}
+      .header .btn{white-space:nowrap}
+    }
+  </style>
+</head>
+
+<body>
+
+<aside class="sidebar" id="sidebar">
+
+  <div class="brand">
+    <div class="brand-icon">
+      <i class="fa-solid fa-crown"></i>
+    </div>
+    <div>
+      <strong>ROLEX</strong>
+      <small>Administration</small>
+    </div>
+  </div>
+
+  <div class="nav-title">Principal</div>
+
+  <a class="nav-link" href="dashboard-admin.html">
+    <i class="fa-solid fa-chart-line"></i> Dashboard
+  </a>
+
+  <a class="nav-link" href="admin-depots.html">
+    <i class="fa-solid fa-arrow-down"></i> Dépôts
+  </a>
+
+  <a class="nav-link" href="admin-investissements.html">
+    <i class="fa-solid fa-chart-pie"></i> Investissements
+  </a>
+
+  <a class="nav-link" href="admin-retraits.html">
+    <i class="fa-solid fa-arrow-up"></i> Retraits
+  </a>
+
+  <a class="nav-link" href="admin-paiements.html">
+    <i class="fa-solid fa-credit-card"></i> Paiements
+  </a>
+
+  <div class="nav-title">Gestion</div>
+
+  <a class="nav-link" href="admin-utilisateurs.html">
+    <i class="fa-solid fa-users"></i> Utilisateurs
+  </a>
+
+  <a class="nav-link active" href="admin-produits.html">
+    <i class="fa-solid fa-box"></i> Produits
+  </a>
+
+  <a class="nav-link" href="admin-administrateurs.html">
+    <i class="fa-solid fa-user-shield"></i> Administrateurs
+  </a>
+
+  <a class="nav-link" href="admin-parametres.html">
+    <i class="fa-solid fa-gear"></i> Paramètres
+  </a>
+
+</aside>
+
+
+<main class="main">
+
+  <div class="mobile">
+    <button class="menu" id="menuBtn">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <strong class="gold">ROLEX</strong>
+  </div>
+
+
+  <div class="header">
+
+    <div>
+      <h1>Produits</h1>
+      <div class="subtitle">
+        Gestion des packs d'investissement.
+      </div>
+    </div>
+
+    <button class="btn" id="addBtn">
+      <i class="fa-solid fa-plus"></i>
+      Nouveau produit
+    </button>
+
+  </div>
+
+
+  <section class="stats">
+
+    <div class="stat">
+      <small>Total produits</small>
+      <strong id="total">0</strong>
+    </div>
+
+    <div class="stat">
+      <small>Produits actifs</small>
+      <strong id="active">0</strong>
+    </div>
+
+    <div class="stat">
+      <small>Produits inactifs</small>
+      <strong id="inactive">0</strong>
+    </div>
+
+    <div class="stat">
+      <small>Prix maximum</small>
+      <strong id="maxPrice" class="gold">0 XOF</strong>
+    </div>
+
+  </section>
+
+
+  <div class="toolbar">
+    <input
+      class="search"
+      id="search"
+      type="search"
+      placeholder="Rechercher un produit..."
+    >
+
+    <button class="btn" id="refreshBtn">
+      <i class="fa-solid fa-rotate"></i>
+    </button>
+  </div>
+
+
+  <section class="card">
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Prix</th>
+            <th>Cycle</th>
+            <th>Revenu journalier</th>
+            <th>Revenu total</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="productsBody">
+          <tr>
+            <td colspan="7">
+              <div class="loading">
+                Chargement...
+              </div>
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<div class="overlay" id="overlay">
+
+  <div class="modal">
+
+    <div class="modal-head">
+      <h2 id="modalTitle">Nouveau produit</h2>
+
+      <button class="close" id="closeBtn">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+
+    <form id="productForm">
+
+      <div class="form">
+
+        <div class="field full">
+          <label>Nom du produit</label>
+          <input id="name" required>
+        </div>
+
+        <div class="field">
+          <label>Prix (XOF)</label>
+          <input id="price" type="number" min="1" required>
+        </div>
+
+        <div class="field">
+          <label>Cycle (heures)</label>
+          <input id="cycle" type="number" min="1" required>
+        </div>
+
+        <div class="field">
+          <label>Revenu journalier (XOF)</label>
+          <input id="daily" type="number" min="0" required>
+        </div>
+
+        <div class="field">
+          <label>Revenu total (XOF)</label>
+          <input id="totalReturn" type="number" min="0" required>
+        </div>
+
+        <div class="field full">
+          <label>URL de l'image</label>
+          <input id="image" type="url">
+        </div>
+
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button type="button" class="btn" id="cancelBtn">
+          Annuler
+        </button>
+
+        <button type="submit" class="btn">
+          Enregistrer
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<script src="admin-produits.js"></script>
+
+</body>
+</html>
