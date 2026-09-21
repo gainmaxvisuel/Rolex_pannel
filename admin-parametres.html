@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ROLEX — Paramètres</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg:#03140a;
+      --panel:#071d10;
+      --panel2:#0a2414;
+      --border:#163b24;
+      --gold:#d4a317;
+      --green:#10b981;
+      --text:#f4f7f5;
+      --muted:#91a49a;
+      --danger:#ef4444;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    button,
+    input{
+      font:inherit;
+    }
+
+    .layout{
+      display:flex;
+      min-height:100vh;
+    }
+
+    .sidebar{
+      width:250px;
+      background:#04180c;
+      border-right:1px solid var(--border);
+      padding:24px 16px;
+      position:fixed;
+      top:0;
+      bottom:0;
+      left:0;
+      z-index:20;
+      transition:.25s;
+    }
+
+    .logo{
+      color:var(--gold);
+      font-size:25px;
+      font-weight:800;
+      letter-spacing:2px;
+      margin-bottom:30px;
+      padding:0 10px;
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+
+    .nav a{
+      color:#b8c7bf;
+      text-decoration:none;
+      padding:12px 13px;
+      border-radius:9px;
+      font-size:14px;
+      transition:.2s;
+    }
+
+    .nav a:hover{
+      background:#0a2917;
+      color:#fff;
+    }
+
+    .nav a.active{
+      background:#12331e;
+      color:var(--gold);
+      border:1px solid #234b30;
+    }
+
+    .main{
+      margin-left:250px;
+      width:calc(100% - 250px);
+      padding:25px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      margin-bottom:25px;
+    }
+
+    .title h1{
+      font-size:26px;
+      margin-bottom:6px;
+    }
+
+    .title p{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .menu-btn{
+      display:none;
+      background:var(--panel);
+      border:1px solid var(--border);
+      color:#fff;
+      border-radius:8px;
+      padding:10px 13px;
+      cursor:pointer;
+    }
+
+    .status{
+      padding:9px 13px;
+      border-radius:8px;
+      background:#082414;
+      border:1px solid #16472a;
+      color:#7ee2b4;
+      font-size:13px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:18px;
+    }
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:13px;
+      padding:20px;
+    }
+
+    .card h2{
+      font-size:17px;
+      margin-bottom:5px;
+    }
+
+    .card .desc{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:20px;
+    }
+
+    .setting{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:15px 0;
+      border-bottom:1px solid #11321f;
+    }
+
+    .setting:last-child{
+      border-bottom:none;
+    }
+
+    .setting-info{
+      min-width:0;
+    }
+
+    .setting-name{
+      font-size:14px;
+      font-weight:600;
+      margin-bottom:5px;
+    }
+
+    .setting-key{
+      color:#64796e;
+      font-size:11px;
+      word-break:break-all;
+    }
+
+    .input-wrap{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      flex-shrink:0;
+    }
+
+    .input-wrap input{
+      width:125px;
+      padding:10px 11px;
+      border-radius:8px;
+      border:1px solid #214b31;
+      background:#04180c;
+      color:#fff;
+      outline:none;
+      text-align:right;
+    }
+
+    .input-wrap input:focus{
+      border-color:var(--gold);
+    }
+
+    .unit{
+      color:var(--muted);
+      font-size:12px;
+      width:45px;
+    }
+
+    .actions{
+      margin-top:24px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+    }
+
+    .save-all{
+      background:var(--gold);
+      color:#111;
+      border:none;
+      border-radius:9px;
+      padding:12px 22px;
+      font-weight:700;
+      cursor:pointer;
+    }
+
+    .save-all:hover{
+      filter:brightness(1.08);
+    }
+
+    .save-all:disabled{
+      opacity:.5;
+      cursor:not-allowed;
+    }
+
+    .message{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      max-width:360px;
+      padding:13px 16px;
+      border-radius:9px;
+      display:none;
+      z-index:100;
+      font-size:14px;
+      border:1px solid;
+    }
+
+    .message.success{
+      display:block;
+      background:#082414;
+      border-color:#17643a;
+      color:#9af0c5;
+    }
+
+    .message.error{
+      display:block;
+      background:#2a0b0b;
+      border-color:#7f2525;
+      color:#ffb0b0;
+    }
+
+    .loading{
+      opacity:.6;
+      pointer-events:none;
+    }
+
+    @media(max-width:900px){
+      .sidebar{
+        transform:translateX(-100%);
+      }
+
+      .sidebar.open{
+        transform:translateX(0);
+      }
+
+      .main{
+        margin-left:0;
+        width:100%;
+      }
+
+      .menu-btn{
+        display:block;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:600px){
+      .main{
+        padding:16px;
+      }
+
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .title h1{
+        font-size:22px;
+      }
+
+      .status{
+        display:none;
+      }
+
+      .card{
+        padding:16px;
+      }
+
+      .setting{
+        align-items:flex-start;
+      }
+
+      .input-wrap input{
+        width:100px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">ROLEX</div>
+
+    <nav class="nav">
+      <a href="dashboard-admin.html">Tableau de bord</a>
+      <a href="admin-depots.html">Dépôts</a>
+      <a href="admin-investissements.html">Investissements</a>
+      <a href="admin-retraits.html">Retraits</a>
+      <a href="admin-paiements.html">Paiements</a>
+      <a href="admin-utilisateurs.html">Utilisateurs</a>
+      <a href="admin-produits.html">Produits</a>
+      <a href="admin-administrateurs.html">Administrateurs</a>
+      <a href="admin-parametres.html" class="active">Paramètres</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="menu-btn" id="menuBtn">☰</button>
+
+        <div class="title">
+          <h1>Paramètres</h1>
+          <p>Configuration générale de la plateforme</p>
+        </div>
+      </div>
+
+      <div class="status">Super administrateur</div>
+    </div>
+
+    <div id="page" class="loading">
+
+      <div class="grid">
+
+        <section class="card">
+          <h2>Dépôts</h2>
+          <p class="desc">Configuration minimale des dépôts utilisateurs.</p>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Dépôt minimum</div>
+              <div class="setting-key">deposit_minimum</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="deposit_minimum" type="number" min="0">
+              <span class="unit">XOF</span>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="card">
+          <h2>Inscription</h2>
+          <p class="desc">Configuration du bonus attribué à l'inscription.</p>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Bonus d'inscription</div>
+              <div class="setting-key">signup_bonus</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="signup_bonus" type="number" min="0">
+              <span class="unit">XOF</span>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="card">
+          <h2>Parrainage</h2>
+          <p class="desc">Pourcentages des commissions par niveau.</p>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Niveau 1</div>
+              <div class="setting-key">referral_level_1_percent</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="referral_level_1_percent" type="number" min="0" step="0.01">
+              <span class="unit">%</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Niveau 2</div>
+              <div class="setting-key">referral_level_2_percent</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="referral_level_2_percent" type="number" min="0" step="0.01">
+              <span class="unit">%</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Niveau 3</div>
+              <div class="setting-key">referral_level_3_percent</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="referral_level_3_percent" type="number" min="0" step="0.01">
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </section>
+
+
+        <section class="card">
+          <h2>Retraits</h2>
+          <p class="desc">Limites, frais et horaires des retraits.</p>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Retrait minimum</div>
+              <div class="setting-key">withdrawal_minimum</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="withdrawal_minimum" type="number" min="0">
+              <span class="unit">XOF</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Frais de retrait</div>
+              <div class="setting-key">withdrawal_fee_percent</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="withdrawal_fee_percent" type="number" min="0" step="0.01">
+              <span class="unit">%</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Début des retraits</div>
+              <div class="setting-key">withdrawal_start_hour</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="withdrawal_start_hour" type="number" min="0" max="23">
+              <span class="unit">h</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Fin des retraits</div>
+              <div class="setting-key">withdrawal_end_hour</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="withdrawal_end_hour" type="number" min="0" max="23">
+              <span class="unit">h</span>
+            </div>
+          </div>
+
+          <div class="setting">
+            <div class="setting-info">
+              <div class="setting-name">Retraits maximum par jour</div>
+              <div class="setting-key">withdrawals_per_day</div>
+            </div>
+
+            <div class="input-wrap">
+              <input id="withdrawals_per_day" type="number" min="0" step="1">
+              <span class="unit">/ jour</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <div class="actions">
+        <button class="save-all" id="saveBtn">Enregistrer les modifications</button>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<div id="message" class="message"></div>
+
+<script src="admin-parametres.js"></script>
+
+</body>
+</html>
