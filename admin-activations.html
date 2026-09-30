@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROLEX — Activations</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#07100c;--panel:#0d1913;--panel2:#111f18;--line:#203229;--text:#f3f7f4;--muted:#91a59a;--gold:#d4a317;--green:#10b981;--red:#ef4444}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+.layout{display:flex;min-height:100vh}.sidebar{width:250px;background:#08130d;border-right:1px solid var(--line);padding:22px 14px;position:fixed;inset:0 auto 0 0;overflow:auto}
+.logo{font-size:25px;font-weight:800;color:var(--gold);padding:8px 12px 25px}.nav-title{font-size:11px;color:#65786e;text-transform:uppercase;margin:18px 12px 8px}
+.nav-link{display:flex;gap:11px;align-items:center;color:#b9c8bf;text-decoration:none;padding:12px;border-radius:10px;margin:4px 0;font-size:14px}.nav-link:hover,.nav-link.active{background:#13251b;color:#fff}.nav-link.active{border-left:3px solid var(--gold)}
+.main{margin-left:250px;width:calc(100% - 250px);padding:28px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:24px}.title h1{margin:0 0 6px;font-size:28px}.title p{margin:0;color:var(--muted)}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.btn-refresh{background:#16271e;color:#fff}.btn-approve{background:var(--green);color:#04110b}.btn-reject{background:#351619;color:#ffb6b6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:22px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:26px;margin-top:7px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.toolbar{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:14px 13px;border-bottom:1px solid #1b2b23;text-align:left;vertical-align:middle}th{font-size:12px;color:#7f9488;text-transform:uppercase}td{font-size:14px}
+.badge{padding:5px 9px;border-radius:999px;font-size:11px;font-weight:800}.pending{background:#3a3013;color:#f4d66e}.approved{background:#103a2b;color:#65e0b0}.rejected{background:#3a171b;color:#ff9ea8}
+.proof{width:92px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#101a15;cursor:pointer}.no-proof{color:#71847a;font-size:12px}.actions{display:flex;gap:7px;white-space:nowrap}
+.empty{padding:45px;text-align:center;color:var(--muted)}.loading{padding:35px;text-align:center;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;background:#0009;z-index:20;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.modal-box{background:#0d1913;border:1px solid var(--line);border-radius:15px;width:min(480px,100%);padding:22px}.modal-box h3{margin-top:0}.modal-box textarea{width:100%;min-height:110px;resize:vertical;background:#08110c;color:#fff;border:1px solid var(--line);border-radius:9px;padding:12px;outline:none}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:15px}
+.image-modal{display:none;position:fixed;inset:0;background:#000d;z-index:30;align-items:center;justify-content:center;padding:20px}.image-modal.show{display:flex}.image-modal img{max-width:95vw;max-height:90vh;border-radius:10px}.close-image{position:fixed;right:20px;top:15px;background:#fff;color:#000;border:0;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:20px}
+.toast{position:fixed;right:20px;bottom:20px;padding:13px 16px;border-radius:10px;background:#13251b;border:1px solid var(--line);display:none;z-index:40}.toast.show{display:block}
+@media(max-width:800px){.sidebar{width:70px;padding:15px 8px}.logo{font-size:0}.logo:after{content:"R";font-size:24px}.nav-link{justify-content:center}.nav-link span,.nav-title{display:none}.main{margin-left:70px;width:calc(100% - 70px);padding:18px}.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="logo">ROLEX</div>
+  <a class="nav-link" href="dashboard-admin.html"><i class="fa-solid fa-gauge"></i><span>Dashboard</span></a>
+  <a class="nav-link" href="admin-depots.html"><i class="fa-solid fa-wallet"></i><span>Dépôts</span></a>
+  <a class="nav-link" href="admin-investissements.html"><i class="fa-solid fa-chart-line"></i><span>Investissements</span></a>
+  <a class="nav-link" href="admin-retraits.html"><i class="fa-solid fa-money-bill-transfer"></i><span>Retraits</span></a>
+  <a class="nav-link" href="admin-paiements.html"><i class="fa-solid fa-credit-card"></i><span>Paiements</span></a>
+  <div class="nav-title">Gestion</div>
+  <a class="nav-link" href="admin-utilisateurs.html"><i class="fa-solid fa-users"></i><span>Utilisateurs</span></a>
+  <a class="nav-link" href="admin-produits.html"><i class="fa-solid fa-box"></i><span>Produits</span></a>
+  <a class="nav-link active" href="admin-activations.html"><i class="fa-solid fa-user-check"></i><span>Activations</span></a>
+  <a class="nav-link" href="admin-administrateurs.html"><i class="fa-solid fa-user-shield"></i><span>Administrateurs</span></a>
+  <a class="nav-link" href="admin-parametres.html"><i class="fa-solid fa-gear"></i><span>Paramètres</span></a>
+</aside>
+
+<main class="main">
+  <div class="header">
+    <div class="title"><h1>Activations</h1><p>Vérifiez les preuves de paiement avant d'activer les comptes.</p></div>
+    <button class="btn btn-refresh" onclick="loadActivations()"><i class="fa-solid fa-rotate"></i> Actualiser</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><small>En attente</small><strong id="statPending">0</strong></div>
+    <div class="stat"><small>Validées</small><strong id="statApproved">0</strong></div>
+    <div class="stat"><small>Rejetées</small><strong id="statRejected">0</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="toolbar"><strong>Demandes d'activation</strong><span id="lastUpdate" style="color:var(--muted);font-size:12px"></span></div>
+    <div id="content" class="loading">Chargement des demandes...</div>
+  </div>
+</main>
+</div>
+
+<div id="rejectModal" class="modal">
+  <div class="modal-box">
+    <h3>Rejeter l'activation</h3>
+    <p id="rejectInfo" style="color:var(--muted)"></p>
+    <textarea id="rejectReason" placeholder="Motif du rejet (facultatif)"></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-refresh" onclick="closeReject()">Annuler</button>
+      <button class="btn btn-reject" onclick="confirmReject()"><i class="fa-solid fa-xmark"></i> Rejeter</button>
+    </div>
+  </div>
+</div>
+
+<div id="imageModal" class="image-modal" onclick="closeImage()">
+  <button class="close-image" onclick="closeImage()">×</button>
+  <img id="proofLarge" src="" alt="Preuve de paiement" onclick="event.stopPropagation()">
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://cbxjcwjlhvicurpndoyz.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_KUd51SQCl10pIgztFFGq9Q_Jp1YCK6o';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const TOKEN_KEY = 'rolex_admin_session_token';
+let rejectId = null;
+
+function token(){
+  return localStorage.getItem(TOKEN_KEY);
+}
+function escapeHtml(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+function money(v){ return new Intl.NumberFormat('fr-FR').format(Number(v||0)) + ' XOF'; }
+function date(v){ return v ? new Date(v).toLocaleString('fr-FR') : '—'; }
+function toast(msg, ok=true){
+  const el=document.getElementById('toast'); el.textContent=msg; el.style.borderColor=ok?'#24563f':'#6b252b'; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+async function proofUrl(path){
+  if(!path) return null;
+  const cleanPath=String(path).trim().replace(/^\/+/, '');
+  try{
+    const res=await fetch(SUPABASE_URL+'/functions/v1/admin-proof-url',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:token(),path:cleanPath})
+    });
+    const data=await res.json().catch(()=>({}));
+    return res.ok && data?.signedUrl ? data.signedUrl : null;
+  }catch(e){ return null; }
+}
+async function loadActivations(){
+  const content=document.getElementById('content');
+  const t=token();
+  if(!t){ content.innerHTML='<div class="empty">Session administrateur introuvable. Reconnectez-vous.</div>'; return; }
+  content.innerHTML='<div class="loading">Chargement des demandes...</div>';
+  const {data,error}=await supabaseClient.rpc('get_admin_activation_requests',{p_token:t,p_status:null});
+  if(error){
+    content.innerHTML='<div class="empty">Erreur : '+escapeHtml(error.message)+'</div>';
+    return;
+  }
+  const rows=data||[];
+  const pending=rows.filter(x=>x.status==='pending').length;
+  const approved=rows.filter(x=>x.status==='approved').length;
+  const rejected=rows.filter(x=>x.status==='rejected').length;
+  document.getElementById('statPending').textContent=pending;
+  document.getElementById('statApproved').textContent=approved;
+  document.getElementById('statRejected').textContent=rejected;
+  document.getElementById('lastUpdate').textContent='Mis à jour à '+new Date().toLocaleTimeString('fr-FR');
+
+  if(!rows.length){content.innerHTML='<div class="empty"><i class="fa-solid fa-circle-check"></i><br><br>Aucune demande d’activation.</div>';return;}
+
+  const prepared=await Promise.all(rows.map(async r=>({...r, proof_url:await proofUrl(r.payment_proof_path)})));
+  // Les URLs signées sont régénérées à chaque actualisation afin que toutes les nouvelles preuves soient affichées.
+
+  content.innerHTML=`<div class="table-wrap"><table>
+    <thead><tr><th>Utilisateur</th><th>Téléphone</th><th>Montant</th><th>Payer avec</th><th>Preuve</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody>${prepared.map(r=>`
+      <tr>
+        <td><strong>${escapeHtml(r.full_name)}</strong><br><small style="color:var(--muted)">${escapeHtml(r.user_code)}</small></td>
+        <td>${escapeHtml(r.phone)}<br><small style="color:var(--muted)">${escapeHtml(r.country_code)}</small></td>
+        <td><strong>${money(r.amount)}</strong></td>
+        <td>${escapeHtml(r.payer_phone)}</td>
+        <td>${r.proof_url?`<img class="proof" src="${escapeHtml(r.proof_url)}" onclick="openImage('${escapeHtml(r.proof_url)}')" alt="Preuve" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="no-proof" style="display:none">Image indisponible</span>`:'<span class="no-proof">Aucune preuve envoyée</span>'}</td>
+        <td>${date(r.created_at)}</td>
+        <td><span class="badge ${escapeHtml(r.status)}">${r.status==='pending'?'En attente':r.status==='approved'?'Validée':'Rejetée'}</span></td>
+        <td>${r.status==='pending'?`<div class="actions"><button class="btn btn-approve" onclick="approve('${r.id}')"><i class="fa-solid fa-check"></i> Valider</button><button class="btn btn-reject" onclick="openReject('${r.id}','${escapeHtml(r.full_name)}')"><i class="fa-solid fa-xmark"></i> Rejeter</button></div>`:`<small style="color:var(--muted)">Déjà traitée</small>`}</td>
+      </tr>`).join('')}</tbody></table></div>`;
+}
+async function approve(id){
+  if(!confirm('Valider cette activation ? Le montant de la demande sera crédité sur le compte.')) return;
+  const {data,error}=await supabaseClient.rpc('admin_approve_activation',{p_token:token(),p_activation_id:id});
+  if(error){toast(error.message,false);return;}
+  if(data?.success){toast('Activation validée avec succès.');loadActivations();}
+  else toast('La validation n’a pas abouti.',false);
+}
+function openReject(id,name){
+  rejectId=id; document.getElementById('rejectInfo').textContent='Demande de '+name;
+  document.getElementById('rejectReason').value='';
+  document.getElementById('rejectModal').classList.add('show');
+}
+function closeReject(){rejectId=null;document.getElementById('rejectModal').classList.remove('show');}
+async function confirmReject(){
+  if(!rejectId)return;
+  const reason=document.getElementById('rejectReason').value.trim();
+  const {data,error}=await supabaseClient.rpc('admin_reject_activation',{p_token:token(),p_activation_id:rejectId,p_reason:reason||null});
+  if(error){toast(error.message,false);return;}
+  if(data?.success){closeReject();toast('Activation rejetée.');loadActivations();}
+  else toast('Le rejet n’a pas abouti.',false);
+}
+function openImage(url){document.getElementById('proofLarge').src=url;document.getElementById('imageModal').classList.add('show');}
+function closeImage(){document.getElementById('imageModal').classList.remove('show');document.getElementById('proofLarge').src='';}
+
+loadActivations();
+// Actualisation automatique pour faire apparaître les nouvelles demandes/preuves sans recharger la page.
+setInterval(()=>{ if(!document.getElementById('imageModal')?.classList.contains('show') && !document.getElementById('rejectModal')?.classList.contains('show')) loadActivations(); }, 30000);
+</script>
+</body>
+</html>
